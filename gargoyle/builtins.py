@@ -8,7 +8,7 @@ gargoyle.builtins
 
 from gargoyle import gargoyle
 from gargoyle.conditions import ModelConditionSet, RequestConditionSet, Percent, String, Boolean, \
-                                ConditionSet
+                                ConditionSet, OnOrAfterDate
 
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.validators import validate_ipv4_address
@@ -21,6 +21,7 @@ class UserConditionSet(ModelConditionSet):
     is_anonymous = Boolean(label='Anonymous')
     is_staff = Boolean(label='Staff')
     is_superuser = Boolean(label='Superuser')
+    date_joined = OnOrAfterDate(label='Joined on or after')
 
     def can_execute(self, instance):
         return isinstance(instance, (User, AnonymousUser))
@@ -77,5 +78,8 @@ class HostConditionSet(ConditionSet):
     def get_field_value(self, instance, field_name):
         if field_name == 'hostname':
             return socket.gethostname()
+
+    def get_group_label(self):
+        return 'Host'
 
 gargoyle.register(HostConditionSet())
