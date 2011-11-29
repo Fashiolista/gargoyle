@@ -8,7 +8,7 @@ gargoyle.builtins
 
 from gargoyle import gargoyle
 from gargoyle.conditions import ModelConditionSet, RequestConditionSet, Percent, String, Boolean, \
-                                ConditionSet, OnOrAfterDate
+                                ConditionSet, OnOrAfterDate, Setting
 
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.validators import validate_ipv4_address
@@ -83,3 +83,25 @@ class HostConditionSet(ConditionSet):
         return 'Host'
 
 gargoyle.register(HostConditionSet())
+
+class SettingConditionSet(ConditionSet):
+    setting = Setting()
+
+    def get_namespace(self):
+        return "setting"
+
+    def can_execute(self, instance):
+        return instance is None
+
+    def get_field_value(self, instance, field_name):
+        if field_name == "setting":
+            from django.conf import settings
+            return settings
+        else:
+            return ConditionSet.get_field_value(self, instance, field_name)
+
+    def get_group_label(self):
+        return 'Setting'
+
+gargoyle.register(SettingConditionSet())
+

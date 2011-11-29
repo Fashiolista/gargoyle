@@ -105,6 +105,28 @@ class Range(Field):
         value = value.split('-')
         return '%s: %s-%s' % (self.label, value[0], value[1])
 
+class Setting(Field):
+    
+    def display(self, value):
+        return '%s: %s' % (self.label, value)
+    
+    def validate(self, data):
+        value = data.get(self.name + '[key]'), data.get(self.name + '[value]')
+        return self.clean(value)
+
+    def clean(self, value):
+        return '='.join(value)
+
+    def is_active(self, condition, settings):
+        key, value = condition.split('=', 1)
+        return getattr(settings, key, None) == value
+
+    def render(self, value):
+        if not value:
+            value = ['', '']
+        return mark_safe('<input type="text" value="%s" placeholder="key" name="%s[key]"/> - <input type="text" placeholder="value" value="%s" name="%s[value]"/>' % \
+                         (escape(value[0]), escape(self.name), escape(value[1]), escape(self.name)))
+
 class Percent(Range):
     default_help_text = 'Enter two ranges. e.g. 0-50 is lower 50%'
     
@@ -263,10 +285,12 @@ class ConditionSet(object):
         return_value = None
         for name, field in self.fields.iteritems():
             field_conditions = conditions.get(self.get_namespace(), {}).get(name)
+            print 'field condition: ', field_conditions
             if field_conditions:
                 value = self.get_field_value(instance, name)
                 for status, condition in field_conditions:
                     exclude = status == EXCLUDE
+                    print condition, value
                     if field.is_active(condition, value):
                         if exclude:
                             return False
