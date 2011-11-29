@@ -285,12 +285,10 @@ class ConditionSet(object):
         return_value = None
         for name, field in self.fields.iteritems():
             field_conditions = conditions.get(self.get_namespace(), {}).get(name)
-            print 'field condition: ', field_conditions
             if field_conditions:
                 value = self.get_field_value(instance, name)
                 for status, condition in field_conditions:
                     exclude = status == EXCLUDE
-                    print condition, value
                     if field.is_active(condition, value):
                         if exclude:
                             return False
