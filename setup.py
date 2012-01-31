@@ -22,8 +22,8 @@ setup(
     packages=find_packages(exclude=["example_project", "tests"]),
     zip_safe=False,
     install_requires=[
-        'django-modeldict>=1.1.6',
-        'nexus>=0.1.7',
+        'django-modeldict==1.1.6',
+        'nexus==0.2.0',
         'django-jsonfield',
     ],
     license='Apache License 2.0',
