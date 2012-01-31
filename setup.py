@@ -25,6 +25,7 @@ setup(
         'django-modeldict==1.1.6',
         'nexus==0.2.0',
         'django-jsonfield',
+        'iptools==0.4.0'
     ],
     license='Apache License 2.0',
     tests_require=tests_require,

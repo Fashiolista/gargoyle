@@ -14,6 +14,7 @@ from django.contrib.auth.models import AnonymousUser, User
 from django.core.validators import validate_ipv4_address
 
 import socket
+import iptools
 
 class UserConditionSet(ModelConditionSet):
     percent = Percent()
@@ -46,6 +47,15 @@ class IPAddress(String):
         validate_ipv4_address(value)
         return value
 
+class IPRange(String):
+    def is_active(self, condition, value):
+        iprange = iptools.IpRangeList(condition)
+        return value in iprange
+
+    def display(self, value):
+        iprange = iptools.IpRangeList(value)
+        return "%r" % iprange
+
 class IPAddressConditionSet(RequestConditionSet):
     percent = Percent()
     ip_address = IPAddress(label='IP Address')
@@ -67,6 +77,21 @@ class IPAddressConditionSet(RequestConditionSet):
 
 gargoyle.register(IPAddressConditionSet())
 
+class IPRangeConditionSet(RequestConditionSet):
+    iprange = IPRange()
+
+    def get_namespace(self):
+        return 'iprange'
+    
+    def get_field_value(self, instance, field_name):
+        return instance.META['REMOTE_ADDR']
+
+    def get_group_label(self):
+        return 'IP Range'
+
+gargoyle.register(IPRangeConditionSet())
+
+
 class HostConditionSet(ConditionSet):
     hostname = String()
 
@@ -82,7 +107,6 @@ class HostConditionSet(ConditionSet):
 
     def get_group_label(self):
         return 'Host'
-
 gargoyle.register(HostConditionSet())
 
 class SettingConditionSet(ConditionSet):
