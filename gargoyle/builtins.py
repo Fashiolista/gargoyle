@@ -12,6 +12,7 @@ from gargoyle.conditions import ModelConditionSet, RequestConditionSet, Percent,
 
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.validators import validate_ipv4_address
+from django.core.exceptions import ValidationError
 
 import socket
 import iptools
@@ -48,6 +49,13 @@ class IPAddress(String):
         return value
 
 class IPRange(String):
+
+    def validate(self, data):
+        value = self.clean(data.get(self.name))
+        if not iptools.validate_cidr(value):
+            raise ValidationError('not a valid ip cidr notation', code='invalid')
+        return value
+
     def is_active(self, condition, value):
         iprange = iptools.IpRangeList(condition)
         return value in iprange
