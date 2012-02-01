@@ -87,7 +87,6 @@ class IPRangeBulk(IPRange):
     def display(self,value):
         values = self.unpack(value)
         return mark_safe("<br />".join([" ".join(values[i:i+5]) for i in xrange(0, len(values), 5)]))
-        #return mark_safe("<br>".join(self.unpack(value)[::5]))
 
     def render(self, value):
         return mark_safe('<textarea name="%s"></textarea>' % (escape(self.name),))
