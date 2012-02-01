@@ -13,6 +13,8 @@ from gargoyle.conditions import ModelConditionSet, RequestConditionSet, Percent,
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.validators import validate_ipv4_address
 from django.core.exceptions import ValidationError
+from django.utils.safestring import mark_safe
+from django.utils.html import escape
 
 import socket
 import iptools
@@ -50,10 +52,13 @@ class IPAddress(String):
 
 class IPRange(String):
 
-    def validate(self, data):
-        value = self.clean(data.get(self.name))
+    def _validate_cidr(self, value):
         if not iptools.validate_cidr(value):
             raise ValidationError('not a valid ip cidr notation', code='invalid')
+
+    def validate(self, data):
+        value = self.clean(data.get(self.name))
+        self._validate_cidr(value)
         return value
 
     def is_active(self, condition, value):
@@ -63,6 +68,29 @@ class IPRange(String):
     def display(self, value):
         iprange = iptools.IpRangeList(value)
         return "%r" % iprange
+
+class IPRangeBulk(IPRange):
+
+    def unpack(self, value):
+        return value.replace("\n"," ").split(" ")
+
+    def validate(self, data):
+        data = self.clean(data.get(self.name, ""))
+        for line in self.unpack(data):
+            self._validate_cidr(line)
+        return data
+
+    def is_active(self, condition, value):
+        conditions = self.unpack(condition)
+        return any([IPRange.is_active(self, c, value) for c in conditions])
+
+    def display(self,value):
+        values = self.unpack(value)
+        return mark_safe("<br />".join([" ".join(values[i:i+5]) for i in xrange(0, len(values), 5)]))
+        #return mark_safe("<br>".join(self.unpack(value)[::5]))
+
+    def render(self, value):
+        return mark_safe('<textarea name="%s"></textarea>' % (escape(self.name),))
 
 class IPAddressConditionSet(RequestConditionSet):
     percent = Percent()
@@ -99,6 +127,19 @@ class IPRangeConditionSet(RequestConditionSet):
 
 gargoyle.register(IPRangeConditionSet())
 
+class IPRangeBulkConditionSet(RequestConditionSet):
+    iprangebulk = IPRangeBulk()
+
+    def get_namespace(self):
+        return 'iprange'
+
+    def get_group_label(self):
+        return 'IP Range'
+
+    def get_field_value(self, instance, field_name):
+        return instance.META['REMOTE_ADDR']
+
+gargoyle.register(IPRangeBulkConditionSet())
 
 class HostConditionSet(ConditionSet):
     hostname = String()

@@ -114,7 +114,7 @@ $(document).ready(function () {
             field: $(this).attr("data-field")
         };
         
-        $.each($(this).find("input"), function () {
+        $.each($(this).find("input,textarea"), function () {
             var val;
 
             if ($(this).attr('type') == 'checkbox') {

@@ -163,7 +163,7 @@
                                 <label>${group.label}</label>
                                 {{ each(i, item) group.conditions }}
                                     <span data-switch="${group.id}" data-field="${item[0]}" data-value="${item[1]}" class="value">
-                                        <nobr>{{if item[3]}}<strong>not</strong> {{/if}}${item[2]}
+                                        <nobr>{{if item[3]}}<strong>not</strong> {{/if}}{{html item[2] }}
                                           <a href="#" class="delete-condition" title="Delete this condition">
                                             <img src="${GARGOYLE.deleteImage}">
                                           </a>
