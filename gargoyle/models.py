@@ -43,9 +43,9 @@ class Switch(models.Model):
         (GLOBAL, 'Global'),
     )
     
-    key = models.CharField(max_length=32, primary_key=True)
+    key = models.CharField(max_length=150, primary_key=True)
     value = JSONField(default="{}")
-    label = models.CharField(max_length=32, null=True)
+    label = models.CharField(max_length=150, null=True)
     date_created = models.DateTimeField(default=datetime.datetime.now)
     description = models.TextField(null=True)
     status = models.PositiveSmallIntegerField(default=DISABLED, choices=STATUS_CHOICES)
